@@ -34,7 +34,7 @@ const Home: React.FC = () => {
                   {topics.map(topic => (
                     <button 
                       key={topic}
-                      className="bg-orange-100 text-orange-900 px-5 py-2 rounded-full text-sm font-semibold hover:opacity-80 transition-opacity"
+                      className="bg-primary/10 text-primary px-5 py-2 rounded-full text-sm font-semibold hover:bg-primary/20 transition-colors"
                     >
                       {topic}
                     </button>

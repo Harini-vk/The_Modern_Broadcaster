@@ -14,11 +14,11 @@ const Explore: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto w-full">
       <header className="mb-12">
-        <div className="inline-flex items-center px-3 py-1 rounded-full bg-orange-100 text-orange-900 text-xs font-bold tracking-wider uppercase mb-4">
+        <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold tracking-widest uppercase mb-4">
           Live Feed
         </div>
         <h1 className="text-5xl md:text-6xl font-medium tracking-tight text-on-surface leading-tight max-w-3xl">
-          Global insights from the heart of modern <span className="italic text-primary">broadcasting</span>.
+          Global insights from the heart of modern <span className="italic text-primary">PulseNews</span>.
         </h1>
       </header>
 

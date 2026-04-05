@@ -1,5 +1,5 @@
 {
-  "name": "The Modern Broadcaster",
+  "name": "PulseNews",
   "description": "A high-end editorial news platform featuring personalized feeds, global exploration, and a sophisticated design system.",
   "requestFramePermissions": [
     "geolocation"

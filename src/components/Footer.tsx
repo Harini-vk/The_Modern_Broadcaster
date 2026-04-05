@@ -7,26 +7,23 @@ export const Footer: React.FC = () => {
       <div className="max-w-7xl mx-auto px-8 py-12 flex flex-col md:flex-row justify-between items-center gap-8">
         <div>
           <div className="text-lg font-bold font-serif text-on-surface mb-2">
-            The Modern Broadcaster
+            Pulse<span className="text-primary">News</span>
           </div>
           <p className="text-on-surface-variant text-sm">
-            © 2024 The Modern Broadcaster. All rights reserved.
+            © 2024 PulseNews Editorial Group. All rights reserved.
           </p>
         </div>
         
         <nav className="flex flex-wrap justify-center gap-8">
-          <Link to="#" className="text-on-surface-variant text-sm hover:underline decoration-primary transition-opacity opacity-80 hover:opacity-100">
-            About
-          </Link>
-          <Link to="#" className="text-on-surface-variant text-sm hover:underline decoration-primary transition-opacity opacity-80 hover:opacity-100">
-            Privacy Policy
-          </Link>
-          <Link to="#" className="text-on-surface-variant text-sm hover:underline decoration-primary transition-opacity opacity-80 hover:opacity-100">
-            Terms of Service
-          </Link>
-          <Link to="#" className="text-on-surface-variant text-sm hover:underline decoration-primary transition-opacity opacity-80 hover:opacity-100">
-            Contact
-          </Link>
+          {['About Us', 'Terms of Service', 'Privacy Policy', 'Contact', 'Archive'].map((link) => (
+            <Link 
+              key={link}
+              to="#" 
+              className="text-on-surface-variant text-sm hover:underline decoration-primary transition-opacity opacity-80 hover:opacity-100"
+            >
+              {link}
+            </Link>
+          ))}
         </nav>
       </div>
     </footer>

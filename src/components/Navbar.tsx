@@ -41,41 +41,56 @@ export const Navbar: React.FC = () => {
       />
       
       <div className="max-w-screen-2xl mx-auto px-6 flex justify-between items-center">
-        <Link to="/" className="text-2xl font-bold font-serif tracking-tight text-on-surface">
-          The Modern Broadcaster
+        <Link to="/" className="text-2xl font-bold font-serif tracking-tight text-on-surface flex items-center gap-1">
+          Pulse<span className="text-primary">News</span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-8">
-          <Link 
-            to="/" 
-            className={cn(
-              "text-sm font-medium transition-colors relative py-1",
-              location.pathname === '/' 
-                ? "text-primary font-bold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary" 
-                : "text-on-surface-variant hover:text-primary"
-            )}
-          >
-            Personalized
-          </Link>
-          <Link 
-            to="/explore" 
-            className={cn(
-              "text-sm font-medium transition-colors relative py-1",
-              location.pathname === '/explore' 
-                ? "text-primary font-bold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary" 
-                : "text-on-surface-variant hover:text-primary"
-            )}
-          >
-            Explore
-          </Link>
+        <nav className="hidden lg:flex items-center gap-8">
+          {['Politics', 'Business', 'Technology', 'Culture'].map((cat) => (
+            <Link 
+              key={cat}
+              to="/explore" 
+              className={cn(
+                "text-sm font-medium transition-colors relative py-1",
+                "text-on-surface-variant hover:text-primary"
+              )}
+            >
+              {cat}
+            </Link>
+          ))}
         </nav>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-6">
+          <div className="hidden md:flex items-center gap-6 mr-2">
+            <Link 
+              to="/" 
+              className={cn(
+                "text-sm font-medium transition-colors relative py-1",
+                location.pathname === '/' 
+                  ? "text-primary font-bold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary" 
+                  : "text-on-surface-variant hover:text-primary"
+              )}
+            >
+              Personalized
+            </Link>
+            <Link 
+              to="/explore" 
+              className={cn(
+                "text-sm font-medium transition-colors relative py-1",
+                location.pathname === '/explore' 
+                  ? "text-primary font-bold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary" 
+                  : "text-on-surface-variant hover:text-primary"
+              )}
+            >
+              Explore
+            </Link>
+          </div>
+
           <div className="relative hidden sm:block">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-variant" />
             <input 
               type="text" 
-              placeholder="Search news..." 
+              placeholder="Search articles..." 
               className="bg-surface-container-highest border-none rounded-full pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary w-64 transition-all outline-none text-on-surface"
             />
           </div>

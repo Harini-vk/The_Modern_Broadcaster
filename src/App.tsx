@@ -9,6 +9,7 @@ const Home = lazy(() => import('./pages/Home'));
 const Explore = lazy(() => import('./pages/Explore'));
 const Auth = lazy(() => import('./pages/Auth'));
 const Preferences = lazy(() => import('./pages/Preferences'));
+const NewsDetail = lazy(() => import('./pages/NewsDetail'));
 
 const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
@@ -51,6 +52,7 @@ export default function App() {
             <Route path="/explore" element={<Explore />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/preferences" element={<Preferences />} />
+            <Route path="/news/:id" element={<NewsDetail />} />
           </Routes>
         </PageWrapper>
       </Router>
