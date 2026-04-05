@@ -1,0 +1,104 @@
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { Search, User, Menu, X, Sun, Moon } from 'lucide-react';
+import { cn } from '../lib/utils';
+import { motion, useScroll, useSpring } from 'motion/react';
+import { useTheme } from './ThemeProvider';
+
+export const Navbar: React.FC = () => {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const location = useLocation();
+  const { theme, toggleTheme } = useTheme();
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const isAuthPage = location.pathname === '/auth';
+
+  if (isAuthPage) return null;
+
+  return (
+    <header 
+      className={cn(
+        "fixed top-0 w-full z-50 transition-all duration-300",
+        isScrolled ? "glass shadow-sm py-3" : "bg-transparent py-5"
+      )}
+    >
+      <motion.div 
+        className="fixed top-0 left-0 right-0 h-[2px] bg-primary origin-left z-[60]"
+        style={{ scaleX }}
+      />
+      
+      <div className="max-w-screen-2xl mx-auto px-6 flex justify-between items-center">
+        <Link to="/" className="text-2xl font-bold font-serif tracking-tight text-on-surface">
+          The Modern Broadcaster
+        </Link>
+
+        <nav className="hidden md:flex items-center gap-8">
+          <Link 
+            to="/" 
+            className={cn(
+              "text-sm font-medium transition-colors relative py-1",
+              location.pathname === '/' 
+                ? "text-primary font-bold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary" 
+                : "text-on-surface-variant hover:text-primary"
+            )}
+          >
+            Personalized
+          </Link>
+          <Link 
+            to="/explore" 
+            className={cn(
+              "text-sm font-medium transition-colors relative py-1",
+              location.pathname === '/explore' 
+                ? "text-primary font-bold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary" 
+                : "text-on-surface-variant hover:text-primary"
+            )}
+          >
+            Explore
+          </Link>
+        </nav>
+
+        <div className="flex items-center gap-4">
+          <div className="relative hidden sm:block">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-variant" />
+            <input 
+              type="text" 
+              placeholder="Search news..." 
+              className="bg-surface-container-highest border-none rounded-full pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary w-64 transition-all outline-none text-on-surface"
+            />
+          </div>
+          
+          <button 
+            onClick={toggleTheme}
+            className="p-2 rounded-full hover:bg-surface-container transition-colors text-on-surface"
+            aria-label="Toggle theme"
+          >
+            {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+          </button>
+
+          <Link 
+            to="/preferences" 
+            className="p-2 rounded-full hover:bg-surface-container transition-colors"
+          >
+            <User className="w-5 h-5 text-on-surface" />
+          </Link>
+          <button className="md:hidden p-2 text-on-surface">
+            <Menu className="w-6 h-6" />
+          </button>
+        </div>
+      </div>
+    </header>
+  );
+};
