@@ -1,11 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Settings, Check, ChevronDown, LogOut } from 'lucide-react';
-import { CATEGORIES } from '../types';
+const CATEGORIES = [
+  "Business",
+  "Entertainment",
+  "General",
+  "Health",
+  "Science",
+  "Sports",
+  "Technology",
+  "Culture"
+];
 import { cn } from '../lib/utils';
 
 const Preferences: React.FC = () => {
   const [interests, setInterests] = useState(['Technology', 'Business']);
   const [readingMode, setReadingMode] = useState('Light');
+  
 
   const toggleInterest = (category: string) => {
     setInterests(prev => 
@@ -14,6 +24,15 @@ const Preferences: React.FC = () => {
         : [...prev, category]
     );
   };
+
+  useEffect(() => {
+  const saved = localStorage.getItem("preferences");
+  if (saved) setInterests(JSON.parse(saved));
+}, []);
+
+useEffect(() => {
+  localStorage.setItem("preferences", JSON.stringify(interests));
+}, [interests]);
 
   return (
     <div className="max-w-5xl mx-auto w-full">

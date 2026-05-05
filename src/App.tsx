@@ -8,6 +8,7 @@ import { ThemeProvider } from './components/ThemeProvider';
 const Home = lazy(() => import('./pages/Home'));
 const Explore = lazy(() => import('./pages/Explore'));
 const Auth = lazy(() => import('./pages/Auth'));
+const Bookmark = lazy(() => import('./pages/Bookmark'));
 const Preferences = lazy(() => import('./pages/Preferences'));
 const NewsDetail = lazy(() => import('./pages/NewsDetail'));
 
@@ -26,7 +27,7 @@ const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         }>
           <AnimatePresence mode="wait">
             <motion.div
-              key={location.pathname}
+              key="page"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
@@ -51,6 +52,7 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/explore" element={<Explore />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/bookmarks" element={<Bookmark/>} />
             <Route path="/preferences" element={<Preferences />} />
             <Route path="/news/:id" element={<NewsDetail />} />
           </Routes>

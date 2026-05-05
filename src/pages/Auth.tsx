@@ -4,15 +4,60 @@ import { TowerControl as RadioTower, Quote, Eye, EyeOff, CheckCircle2 } from 'lu
 import { motion } from 'motion/react';
 import { cn } from '../lib/utils';
 
+import API from "../api/axios";
+
 const Auth: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    navigate('/');
-  };
+
+
+const handleLogin = async () => {
+  try {
+    const res = await API.post("/auth/login", {
+      email,
+      password
+    });
+
+    localStorage.setItem("token", res.data.token);
+
+    alert("Login successful");
+    navigate("/"); // go to home
+
+  } catch (err) {
+    alert("Login failed");
+  }
+};
+
+const handleSignup = async () => {
+  try {
+    await API.post("/auth/signup", {
+      name,
+      email,
+      password
+    });
+
+    alert("Signup successful! Please login");
+
+  } catch (err) {
+    alert("Signup failed");
+  }
+};
+
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  if (isLogin) {
+    await handleLogin();
+  } else {
+    await handleSignup();
+  }
+};
+  
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
@@ -101,14 +146,29 @@ const Auth: React.FC = () => {
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
+                {!isLogin && (
+  <div className="space-y-2">
+    <label className="text-sm font-semibold text-on-surface ml-1">Name</label>
+    <input
+      type="text"
+      placeholder="Your name"
+      value={name}
+      onChange={(e) => setName(e.target.value)}
+      className="w-full px-4 py-3.5 bg-surface-container-highest rounded-xl outline-none"
+      required
+    />
+  </div>
+)}
                 <label className="text-sm font-semibold text-on-surface ml-1" htmlFor="email">Email address</label>
-                <input 
-                  id="email"
-                  type="email" 
-                  placeholder="name@example.com"
-                  className="w-full px-4 py-3.5 bg-surface-container-highest border-none rounded-xl focus:ring-2 focus:ring-primary transition-all text-on-surface outline-none"
-                  required
-                />
+<input 
+  id="email"
+  type="email"
+  placeholder="name@example.com"
+  value={email}
+  onChange={(e) => setEmail(e.target.value)}
+  className="w-full px-4 py-3.5 bg-surface-container-highest border-none rounded-xl focus:ring-2 focus:ring-primary transition-all text-on-surface outline-none"
+  required
+/>
               </div>
 
               <div className="space-y-2">
@@ -117,13 +177,15 @@ const Auth: React.FC = () => {
                   {isLogin && <a href="#" className="text-xs text-primary font-medium hover:underline">Forgot?</a>}
                 </div>
                 <div className="relative">
-                  <input 
-                    id="password"
-                    type={showPassword ? "text" : "password"} 
-                    placeholder="••••••••"
-                    className="w-full px-4 py-3.5 bg-surface-container-highest border-none rounded-xl focus:ring-2 focus:ring-primary transition-all text-on-surface outline-none"
-                    required
-                  />
+               <input 
+  id="password"
+  type={showPassword ? "text" : "password"}
+  placeholder="••••••••"
+  value={password}
+  onChange={(e) => setPassword(e.target.value)}
+  className="w-full px-4 py-3.5 bg-surface-container-highest border-none rounded-xl focus:ring-2 focus:ring-primary transition-all text-on-surface outline-none"
+  required
+/>
                   <button 
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}

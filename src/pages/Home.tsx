@@ -1,14 +1,27 @@
 import React from 'react';
-import { ARTICLES } from '../types';
 import { NewsCard } from '../components/NewsCard';
 import { ChevronDown } from 'lucide-react';
+import { useEffect, useState } from "react";
+import API from "../api/axios";
 
 const Home: React.FC = () => {
-  const featuredArticles = ARTICLES.slice(0, 4);
-  const topics = [
-    "Quantum Computing", "Renewable Energy", "European Travel", 
-    "Architecture", "Space Exploration"
-  ];
+const [articles, setArticles] = useState<any[]>([]);
+const [page, setPage] = useState(1);
+
+const topics = [
+  "Tech", "Sports", "Health", "Business"
+];
+const fetchNews = async (pageNum = 1) => {
+  try {
+    const res = await API.get(`/news?page=${pageNum}&limit=10`);
+    setArticles(prev => [...prev, ...res.data.articles]);
+  } catch (err) {
+    console.log(err);
+  }
+};
+useEffect(() => {
+  fetchNews(1);
+}, []);
 
   return (
     <div className="max-w-5xl mx-auto w-full">
@@ -22,8 +35,8 @@ const Home: React.FC = () => {
       </header>
 
       <div className="space-y-12">
-        {featuredArticles.map((article, index) => (
-          <React.Fragment key={article.id}>
+        {articles.map((article, index) => (
+          <React.Fragment key={article.url}>
             <NewsCard article={article} />
             {index === 2 && (
               <section className="py-8 bg-surface-container-low rounded-xl px-8">
@@ -32,7 +45,12 @@ const Home: React.FC = () => {
                 </h3>
                 <div className="flex flex-wrap gap-3">
                   {topics.map(topic => (
-                    <button 
+                    <button
+                    onClick={() => {
+  const nextPage = page + 1;
+  setPage(nextPage);
+  fetchNews(nextPage);
+}} 
                       key={topic}
                       className="bg-primary/10 text-primary px-5 py-2 rounded-full text-sm font-semibold hover:bg-primary/20 transition-colors"
                     >

@@ -4,6 +4,7 @@ import { Search, User, Menu, X, Sun, Moon } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion, useScroll, useSpring } from 'motion/react';
 import { useTheme } from './ThemeProvider';
+import { Bookmark } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -46,18 +47,28 @@ export const Navbar: React.FC = () => {
         </Link>
 
         <nav className="hidden lg:flex items-center gap-8">
-          {['Politics', 'Business', 'Technology', 'Culture'].map((cat) => (
-            <Link 
-              key={cat}
-              to="/explore" 
-              className={cn(
-                "text-sm font-medium transition-colors relative py-1",
-                "text-on-surface-variant hover:text-primary"
-              )}
-            >
-              {cat}
-            </Link>
-          ))}
+          {['General', 'Business', 'Technology', 'Entertainment'].map((cat) => {
+const categoryMap: Record<string, string> = {
+  General: "general",
+  Business: "business",
+  Technology: "technology",
+  Entertainment: "entertainment"
+};
+  return (
+    <Link 
+      key={cat}
+      to={`/explore?category=${categoryMap[cat]}`}
+      className={cn(
+        "text-sm font-medium transition-colors relative py-1",
+        "text-on-surface-variant hover:text-primary"
+      )}
+    >
+      {cat}
+    </Link>
+  );
+})}
+
+
         </nav>
 
         <div className="flex items-center gap-6">
@@ -84,6 +95,18 @@ export const Navbar: React.FC = () => {
             >
               Explore
             </Link>
+                      <Link 
+            to="/bookmarks" 
+            className={cn(
+              "flex items-center gap-1 text-sm font-medium transition-colors relative py-1",
+              location.pathname === '/bookmarks'
+                ? "text-primary font-bold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary"
+                : "text-on-surface-variant hover:text-primary"
+            )}
+          >
+            <Bookmark className="w-4 h-4" />
+            Bookmarks
+          </Link>
           </div>
 
           <div className="relative hidden sm:block">

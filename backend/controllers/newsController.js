@@ -24,7 +24,7 @@ const getNews = async (req, res) => {
       title: article.title,
       description: article.description,
       url: article.url,
-      image: article.urlToImage,
+      image: article.urlToImage || "https://via.placeholder.com/400x200?text=No+Image",
       source: article.source.name,
       publishedAt: article.publishedAt
     }));
@@ -60,7 +60,7 @@ const searchNews = async (req, res) => {
       title: article.title,
       description: article.description,
       url: article.url,
-      image: article.urlToImage,
+      image: article.urlToImage || "https://via.placeholder.com/400x200?text=No+Image",
       source: article.source.name,
       publishedAt: article.publishedAt
     }));
@@ -105,7 +105,7 @@ const getPersonalizedNews = async (req, res) => {
         title: article.title,
         description: article.description,
         url: article.url,
-        image: article.urlToImage,
+        image: article.urlToImage || "https://via.placeholder.com/400x200?text=No+Image",
         source: article.source.name,
         publishedAt: article.publishedAt
   }))
@@ -133,6 +133,4 @@ const getPersonalizedNews = async (req, res) => {
 };
 
 
-
-module.exports = { getNews, searchNews, getPersonalizedNews: exports.getPersonalizedNews
- };
+module.exports = { getNews, searchNews, getPersonalizedNews };

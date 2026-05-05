@@ -1,6 +1,12 @@
 import React from 'react';
 import { TrendingUp, Mail } from 'lucide-react';
-import { TRENDING } from '../types';
+// import { TRENDING } from '../types';
+
+const TRENDING = [
+  { id: 1, title: "AI is changing the world" },
+  { id: 2, title: "Tech layoffs increasing globally" },
+  { id: 3, title: "Health innovations rising fast" }
+];
 
 export const Sidebar: React.FC = () => {
   return (
