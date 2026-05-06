@@ -4,55 +4,97 @@ import { ArrowLeft, Share2, Bookmark } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Article } from '../types';
 import { NewsCard } from '../components/NewsCard';
+import API from "../api/axios";
 
-const BOOKMARKS_KEY = 'bookmarks';
 const FALLBACK_IMAGE = 'https://via.placeholder.com/1200x600?text=No+Image';
-
-const readBookmarks = (): Article[] => {
-  try {
-    const raw = localStorage.getItem(BOOKMARKS_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-};
 
 const NewsDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
   const stateArticle = (location.state as { article?: Article } | null)?.article;
-  const queryUrl = new URLSearchParams(location.search).get('url');
-  const requestedUrl = queryUrl || (id ? decodeURIComponent(id) : '');
+  const hasToken = !!localStorage.getItem("token");
 
-  const [bookmarks, setBookmarks] = useState<Article[]>(() => readBookmarks());
+  const [bookmarks, setBookmarks] = useState<Article[]>([]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [id, location.search]);
 
-const article = useMemo(() => {
-  if (stateArticle) return stateArticle;
-  return null;
-}, [stateArticle]);
+  useEffect(() => {
+    const fetchBookmarks = async () => {
+      if (!hasToken) return;
+      try {
+        const res = await API.get("/bookmarks");
+        setBookmarks(
+          (res.data || []).map((item: any) => ({
+            ...item,
+            bookmarkId: item._id
+          }))
+        );
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchBookmarks();
+  }, [hasToken]);
+
+  const article = useMemo(() => {
+    if (stateArticle) return stateArticle;
+    return null;
+  }, [stateArticle]);
+
+  useEffect(() => {
+    const recordView = async () => {
+      if (!article) return;
+      try {
+        await API.post("/news/engagement", {
+          url: article.url,
+          title: article.title,
+          image: article.image,
+          source: article.source,
+          category: article.category
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    recordView();
+  }, [article]);
 
   const relatedArticles = useMemo(() => {
     if (!article?.url) return [];
-    return bookmarks.filter((item) => item.url !== article.url).slice(0, 3);
+    return bookmarks.filter((item) => item.url && item.url !== article.url).slice(0, 3);
   }, [article, bookmarks]);
 
   const saved = !!article?.url && bookmarks.some((item) => item.url === article.url);
 
-  const handleBookmark = () => {
+  const handleBookmark = async () => {
     if (!article) return;
+    if (!hasToken) {
+      window.alert("Please login to save bookmarks.");
+      return;
+    }
 
-    const nextBookmarks = saved
-      ? bookmarks.filter((item) => item.url !== article.url)
-      : [...bookmarks, article];
-
-    setBookmarks(nextBookmarks);
-    localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(nextBookmarks));
+    try {
+      if (saved) {
+        const target = bookmarks.find((item) => item.url === article.url);
+        if (!target?.bookmarkId) return;
+        await API.delete(`/bookmarks/${target.bookmarkId}`);
+        setBookmarks((prev) => prev.filter((item) => item.url !== article.url));
+      } else {
+        await API.post("/bookmarks", {
+          title: article.title,
+          url: article.url,
+          image: article.image,
+          source: article.source
+        });
+        setBookmarks((prev) => [...prev, article]);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const handleShare = async () => {

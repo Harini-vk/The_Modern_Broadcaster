@@ -1,4 +1,5 @@
 const axios = require("axios");
+const ArticleEngagement = require("../models/ArticleEngagement");
 
 //general news -> to fetch from newsapi
 const getNews = async (req, res) => {
@@ -44,7 +45,10 @@ const getNews = async (req, res) => {
 //search news 
 const searchNews = async (req, res) => {
   try {
-    const query = req.query.q;   // ✅ get search text
+    const query = req.query.q;
+    if (!query || !query.trim()) {
+      return res.status(400).json({ message: "Search query is required" });
+    }
 
     const response = await axios.get(
       "https://newsapi.org/v2/everything",
@@ -70,6 +74,54 @@ const searchNews = async (req, res) => {
   } catch (error) {
     console.error(error.response?.data || error.message);
     res.status(500).json({ message: "Error searching news" });
+  }
+};
+
+const recordEngagement = async (req, res) => {
+  try {
+    const { url, title, image, source, category } = req.body;
+
+    if (!url || !title) {
+      return res.status(400).json({ message: "Article url and title are required" });
+    }
+
+    const now = new Date();
+    const updated = await ArticleEngagement.findOneAndUpdate(
+      { url },
+      {
+        $set: {
+          title,
+          image: image || "",
+          source: source || "",
+          category: category || "general",
+          lastEngagedAt: now
+        },
+        $inc: { views: 1 }
+      },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+
+    res.json({ message: "Engagement recorded", views: updated.views });
+  } catch (error) {
+    res.status(500).json({ message: "Error recording engagement" });
+  }
+};
+
+const getTrendingNews = async (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit, 10) || 6, 20);
+    const since = new Date(Date.now() - 1000 * 60 * 60 * 24 * 7);
+
+    const trending = await ArticleEngagement.find({
+      lastEngagedAt: { $gte: since }
+    })
+      .sort({ views: -1, lastEngagedAt: -1 })
+      .limit(limit)
+      .select("title url image source category views lastEngagedAt");
+
+    res.json(trending);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching trending news" });
   }
 };
 
@@ -133,4 +185,10 @@ const getPersonalizedNews = async (req, res) => {
 };
 
 
-module.exports = { getNews, searchNews, getPersonalizedNews };
+module.exports = {
+  getNews,
+  searchNews,
+  getPersonalizedNews,
+  recordEngagement,
+  getTrendingNews
+};

@@ -1,4 +1,5 @@
 export interface Article {
+  _id?: string;
   title: string;
   description: string;
   url: string;
@@ -9,4 +10,6 @@ export interface Article {
   // Optional fields (for UI flexibility)
   category?: string;
   readTime?: string;
+  views?: number;
+  bookmarkId?: string;
 }

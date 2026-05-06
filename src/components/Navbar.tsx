@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Search, User, Menu, X, Sun, Moon } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion, useScroll, useSpring } from 'motion/react';
@@ -8,7 +8,9 @@ import { Bookmark } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [searchText, setSearchText] = useState('');
   const location = useLocation();
+  const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
@@ -24,6 +26,12 @@ export const Navbar: React.FC = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const submitSearch = () => {
+    const query = searchText.trim();
+    if (!query) return;
+    navigate(`/explore?search=${encodeURIComponent(query)}`);
+  };
 
   const isAuthPage = location.pathname === '/auth';
 
@@ -114,6 +122,13 @@ const categoryMap: Record<string, string> = {
             <input 
               type="text" 
               placeholder="Search articles..." 
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  submitSearch();
+                }
+              }}
               className="bg-surface-container-highest border-none rounded-full pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary w-64 transition-all outline-none text-on-surface"
             />
           </div>

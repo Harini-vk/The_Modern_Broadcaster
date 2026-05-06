@@ -10,29 +10,54 @@ const CATEGORIES = [
   "Technology",
   "Culture"
 ];
+import API from "../api/axios";
 import { cn } from '../lib/utils';
+
 
 const Preferences: React.FC = () => {
   const [interests, setInterests] = useState(['Technology', 'Business']);
   const [readingMode, setReadingMode] = useState('Light');
+  const [user, setUser] = useState<any>(null);
   
 
-  const toggleInterest = (category: string) => {
-    setInterests(prev => 
-      prev.includes(category) 
-        ? prev.filter(c => c !== category) 
-        : [...prev, category]
-    );
-  };
+const toggleInterest = async (category: string) => {
+  const cat = category.toLowerCase(); // ✅ normalize
 
-  useEffect(() => {
-  const saved = localStorage.getItem("preferences");
-  if (saved) setInterests(JSON.parse(saved));
-}, []);
+  let updated;
+
+  if (interests.includes(cat)) {
+    updated = interests.filter(c => c !== cat);
+  } else {
+    updated = [...interests, cat];
+  }
+
+  setInterests(updated);
+
+  try {
+    await API.post("/preferences", {
+      preferences: updated
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
 
 useEffect(() => {
-  localStorage.setItem("preferences", JSON.stringify(interests));
-}, [interests]);
+  const fetchUser = async () => {
+    try {
+      const res = await API.get("/auth/me");
+
+      console.log("USER DATA 👉", res.data); // 👈 ADD THIS
+
+      setUser(res.data);
+      setInterests(res.data.preferences || []);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  fetchUser();
+}, []);
 
   return (
     <div className="max-w-5xl mx-auto w-full">
@@ -49,20 +74,20 @@ useEffect(() => {
                 <img 
                   src="https://i.pravatar.cc/150?u=alex" 
                   className="w-full h-full object-cover" 
-                  alt="Alexander Vance"
+                  alt="User Avatar"
                 />
               </div>
-              <h2 className="text-2xl font-bold font-serif">Alexander Vance</h2>
+              <h2 className="text-2xl font-bold font-serif">{user?.name || "unknown"}</h2>
               <p className="text-on-surface-variant text-sm mb-6">Premium Subscriber since 2022</p>
               
               <div className="w-full space-y-4 text-left">
                 <div>
                   <label className="text-xs font-bold text-on-surface-variant tracking-wider uppercase">Email Address</label>
-                  <p className="text-on-surface font-medium">a.vance@editorial.com</p>
+                  <p className="text-on-surface font-medium">{user?.email || "unknown@editorial.com"}</p>
                 </div>
                 <div>
                   <label className="text-xs font-bold text-on-surface-variant tracking-wider uppercase">Location</label>
-                  <p className="text-on-surface font-medium">London, UK</p>
+                  <p className="text-on-surface font-medium">{user?.location || "London, UK"}</p>
                 </div>
               </div>
 
@@ -94,12 +119,12 @@ useEffect(() => {
                   onClick={() => toggleInterest(category)}
                   className={cn(
                     "px-6 py-3 rounded-full border-2 transition-all flex items-center gap-2",
-                    interests.includes(category)
+                      interests.includes(category.toLowerCase())
                       ? "border-primary bg-primary text-white"
                       : "border-outline-variant/30 text-on-surface hover:border-primary hover:bg-primary/5"
                   )}
                 >
-                  {interests.includes(category) && <Check className="w-4 h-4" />}
+                  {interests.includes(category.toLowerCase()) && <Check className="w-4 h-4" />}
                   {category}
                 </button>
               ))}

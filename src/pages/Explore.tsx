@@ -4,6 +4,7 @@ import { Sidebar } from '../components/Sidebar';
 import { cn } from '../lib/utils';
 import API from "../api/axios";
 import { useLocation } from "react-router-dom";
+import { Article } from "../types";
 
 import { useNavigate } from "react-router-dom";
 
@@ -14,15 +15,14 @@ const CATEGORIES = [
 ];
 
 const Explore = () => {
-
-  const [articles, setArticles] = useState<any[]>([]);
-  const [page, setPage] = useState(1);
+  const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
 const location = useLocation();
 const params = new URLSearchParams(location.search);
 const categoryFromURL = params.get("category");
+const searchFromURL = params.get("search");
 const formatCategory = (cat: string | null | undefined): string =>
   cat ? cat.charAt(0).toUpperCase() + cat.slice(1) : "All";
 
@@ -30,9 +30,15 @@ const [activeCategory, setActiveCategory] = useState(
   formatCategory(categoryFromURL)
 );
 
-  const fetchNews = async (pageNum = 1, selectedCategory = activeCategory) => {
+  const fetchNews = async (selectedCategory = activeCategory) => {
     try {
       setLoading(true);
+
+      if (searchFromURL) {
+        const res = await API.get(`/news/search?q=${encodeURIComponent(searchFromURL)}`);
+        setArticles(res.data || []);
+        return;
+      }
 
       const categoryParam =
         selectedCategory === "All"
@@ -40,7 +46,7 @@ const [activeCategory, setActiveCategory] = useState(
           : selectedCategory.toLowerCase();
 
       const res = await API.get(
-        `/news?page=${pageNum}&limit=10&category=${categoryParam}`
+        `/news?page=1&limit=10&category=${categoryParam}`
       );
 
       setArticles(res.data.articles);
@@ -56,17 +62,19 @@ useEffect(() => {
   const selectedCategory = categoryFromURL || "general";
 
   setActiveCategory(formatCategory(selectedCategory));
-  fetchNews(1, selectedCategory);
+  fetchNews(selectedCategory);
 
 }, [location.search]);
 
   return (
     <div className="max-w-7xl mx-auto w-full">
       <header className="mb-12">
-        <h1 className="text-5xl font-medium">Explore News</h1>
+        <h1 className="text-5xl font-medium">
+          {searchFromURL ? `Search: "${searchFromURL}"` : "Explore News"}
+        </h1>
       </header>
 
-      <section className="mb-12 overflow-x-auto">
+      <section className={cn("mb-12 overflow-x-auto", searchFromURL ? "opacity-40 pointer-events-none" : "")}>
         <div className="flex gap-2">
           {CATEGORIES.map(category => (
             <button
@@ -97,10 +105,10 @@ useEffect(() => {
             <p>Loading...</p>
           ) : articles.length > 0 ? (
             articles.map((article, index) => (
-              <NewsCard key={index} article={article} />
+              <NewsCard key={article.url || index} article={article} />
             ))
           ) : (
-            <p>No news found</p>
+            <p>{searchFromURL ? "No matching articles found." : "No news found"}</p>
           )}
         </div>
 
