@@ -5,6 +5,8 @@ import ReactMarkdown from 'react-markdown';
 import { Article } from '../types';
 import { NewsCard } from '../components/NewsCard';
 import API from "../api/axios";
+import toast from 'react-hot-toast';
+
 
 const FALLBACK_IMAGE = 'https://via.placeholder.com/1200x600?text=No+Image';
 
@@ -70,10 +72,12 @@ const NewsDetail: React.FC = () => {
 
   const saved = !!article?.url && bookmarks.some((item) => item.url === article.url);
 
+
+
   const handleBookmark = async () => {
     if (!article) return;
     if (!hasToken) {
-      window.alert("Please login to save bookmarks.");
+     toast.error("Please login to save bookmarks.");
       return;
     }
 
@@ -84,13 +88,13 @@ const NewsDetail: React.FC = () => {
         await API.delete(`/bookmarks/${target.bookmarkId}`);
         setBookmarks((prev) => prev.filter((item) => item.url !== article.url));
       } else {
-        await API.post("/bookmarks", {
+        const res = await API.post("/bookmarks", {
           title: article.title,
           url: article.url,
           image: article.image,
           source: article.source
         });
-        setBookmarks((prev) => [...prev, article]);
+        setBookmarks((prev) => [...prev, { ...article, bookmarkId: res.data._id }]);
       }
     } catch (error) {
       console.log(error);
@@ -110,7 +114,7 @@ const NewsDetail: React.FC = () => {
     }
 
     await navigator.clipboard.writeText(article.url);
-    window.alert('Article link copied to clipboard.');
+    toast.success('Article link copied to clipboard.');
   };
 
   if (!article) {
@@ -128,6 +132,7 @@ const NewsDetail: React.FC = () => {
   }
 
   return (
+    
     <div className="max-w-4xl mx-auto">
       <Link
         to="/"

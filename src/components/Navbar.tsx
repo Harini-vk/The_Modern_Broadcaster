@@ -9,6 +9,7 @@ import { Bookmark } from 'lucide-react';
 export const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchText, setSearchText] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem("token"));
   const location = useLocation();
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
@@ -25,6 +26,16 @@ export const Navbar: React.FC = () => {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const syncAuth = () => setIsAuthenticated(!!localStorage.getItem("token"));
+    window.addEventListener("auth-changed", syncAuth);
+    window.addEventListener("storage", syncAuth);
+    return () => {
+      window.removeEventListener("auth-changed", syncAuth);
+      window.removeEventListener("storage", syncAuth);
+    };
   }, []);
 
   const submitSearch = () => {
@@ -50,7 +61,7 @@ export const Navbar: React.FC = () => {
       />
       
       <div className="max-w-screen-2xl mx-auto px-6 flex justify-between items-center">
-        <Link to="/" className="text-2xl font-bold font-serif tracking-tight text-on-surface flex items-center gap-1">
+        <Link to="/explore?category=all" className="text-2xl font-bold font-serif tracking-tight text-on-surface flex items-center gap-1">
           Pulse<span className="text-primary">News</span>
         </Link>
 
@@ -82,10 +93,10 @@ const categoryMap: Record<string, string> = {
         <div className="flex items-center gap-6">
           <div className="hidden md:flex items-center gap-6 mr-2">
             <Link 
-              to="/" 
+              to="/personalized" 
               className={cn(
                 "text-sm font-medium transition-colors relative py-1",
-                location.pathname === '/' 
+                location.pathname === '/personalized' 
                   ? "text-primary font-bold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary" 
                   : "text-on-surface-variant hover:text-primary"
               )}
@@ -103,7 +114,8 @@ const categoryMap: Record<string, string> = {
             >
               Explore
             </Link>
-                      <Link 
+            {isAuthenticated && (
+              <Link 
             to="/bookmarks" 
             className={cn(
               "flex items-center gap-1 text-sm font-medium transition-colors relative py-1",
@@ -115,6 +127,7 @@ const categoryMap: Record<string, string> = {
             <Bookmark className="w-4 h-4" />
             Bookmarks
           </Link>
+            )}
           </div>
 
           <div className="relative hidden sm:block">
@@ -141,12 +154,21 @@ const categoryMap: Record<string, string> = {
             {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
           </button>
 
-          <Link 
-            to="/preferences" 
-            className="p-2 rounded-full hover:bg-surface-container transition-colors"
-          >
-            <User className="w-5 h-5 text-on-surface" />
-          </Link>
+          {isAuthenticated ? (
+            <Link 
+              to="/preferences" 
+              className="p-2 rounded-full hover:bg-surface-container transition-colors"
+            >
+              <User className="w-5 h-5 text-on-surface" />
+            </Link>
+          ) : (
+            <Link
+              to="/auth"
+              className="text-sm font-semibold text-primary hover:underline"
+            >
+              Login
+            </Link>
+          )}
           <button className="md:hidden p-2 text-on-surface">
             <Menu className="w-6 h-6" />
           </button>

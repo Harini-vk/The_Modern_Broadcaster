@@ -32,7 +32,7 @@ export const Sidebar: React.FC = () => {
           ))}
         </ul>
         
-        <div className="mt-10 p-6 rounded-xl bg-primary text-white">
+        <div className="mt-10 p-6 rounded-xl bg-blue-300 text-black">
           <h4 className="font-bold mb-2 flex items-center gap-2">
             <Mail className="w-4 h-4" />
             Subscribe to Newsletters

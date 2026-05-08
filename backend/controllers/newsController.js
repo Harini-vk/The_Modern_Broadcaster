@@ -1,12 +1,81 @@
 const axios = require("axios");
 const ArticleEngagement = require("../models/ArticleEngagement");
+const User = require("../models/User");
+
+const FALLBACK_IMAGE = "https://via.placeholder.com/400x200?text=No+Image";
+const ALL_CATEGORIES = ["general", "business", "entertainment", "health", "science", "sports", "technology"];
+
+const toCleanArticle = (article, category = "general") => ({
+  title: article?.title || "Latest News Update",
+  description: article?.description || "Stay updated with the latest developments.",
+  url: article?.url || `https://example.com/news/${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+  image: article?.urlToImage || article?.image || FALLBACK_IMAGE,
+  source: article?.source?.name || article?.source || "PulseNews",
+  publishedAt: article?.publishedAt || new Date().toISOString(),
+  category
+});
+
+const buildFallbackArticles = (category, pageSize = 10) => {
+  const targetCategories = category === "all" ? ALL_CATEGORIES : [category];
+  const now = Date.now();
+  const articles = [];
+
+  targetCategories.forEach((cat, catIndex) => {
+    for (let i = 0; i < Math.max(2, Math.ceil(pageSize / targetCategories.length)); i += 1) {
+      articles.push({
+        title: `${cat.charAt(0).toUpperCase() + cat.slice(1)} Brief ${i + 1}`,
+        description: `Fallback story for ${cat} while live news source is unavailable.`,
+        url: `https://fallback.local/${cat}/${now}-${catIndex}-${i}`,
+        image: FALLBACK_IMAGE,
+        source: "PulseNews",
+        publishedAt: new Date(now - i * 60000).toISOString(),
+        category: cat
+      });
+    }
+  });
+
+  return articles.slice(0, pageSize);
+};
 
 //general news -> to fetch from newsapi
 const getNews = async (req, res) => {
   try {
-    const category = req.query.category || "general";
+    const category = (req.query.category || "general").toLowerCase();
     const page = parseInt(req.query.page) || 1;
     const pageSize = parseInt(req.query.limit) || 10;
+
+    if (category === "all") {
+      const requests = ALL_CATEGORIES.map((cat) =>
+        axios.get("https://newsapi.org/v2/top-headlines", {
+          params: {
+            country: "us",
+            category: cat,
+            page,
+            pageSize: Math.max(1, Math.floor(pageSize / 2)),
+            apiKey: process.env.NEWS_API_KEY
+          }
+        })
+      );
+
+      const responses = await Promise.all(requests);
+      const merged = responses.flatMap((response, index) =>
+        response.data.articles.map((article) => toCleanArticle(article, ALL_CATEGORIES[index]))
+      );
+
+      const uniqueArticles = [];
+      const seen = new Set();
+      for (const article of merged) {
+        if (!article.url || seen.has(article.url)) continue;
+        seen.add(article.url);
+        uniqueArticles.push(article);
+      }
+
+      return res.json({
+        page,
+        totalResults: uniqueArticles.length,
+        articles: uniqueArticles.slice(0, pageSize)
+      });
+    }
 
     const response = await axios.get(
       "https://newsapi.org/v2/top-headlines",
@@ -21,14 +90,7 @@ const getNews = async (req, res) => {
       }
     );
 
-    const cleanedArticles = response.data.articles.map(article => ({
-      title: article.title,
-      description: article.description,
-      url: article.url,
-      image: article.urlToImage || "https://via.placeholder.com/400x200?text=No+Image",
-      source: article.source.name,
-      publishedAt: article.publishedAt
-    }));
+    const cleanedArticles = response.data.articles.map((article) => toCleanArticle(article, category));
 
     res.json({
       page,
@@ -37,7 +99,17 @@ const getNews = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({ message: "Error fetching news" });
+    console.error("getNews failed:", error.response?.data || error.message);
+    const category = (req.query.category || "general").toLowerCase();
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.limit) || 10;
+    const fallbackArticles = buildFallbackArticles(category, pageSize);
+    res.json({
+      page,
+      totalResults: fallbackArticles.length,
+      articles: fallbackArticles,
+      fallback: true
+    });
   }
 };
 
@@ -60,20 +132,15 @@ const searchNews = async (req, res) => {
       }
     );
 
-    const cleanedArticles = response.data.articles.map(article => ({
-      title: article.title,
-      description: article.description,
-      url: article.url,
-      image: article.urlToImage || "https://via.placeholder.com/400x200?text=No+Image",
-      source: article.source.name,
-      publishedAt: article.publishedAt
-    }));
+    const cleanedArticles = response.data.articles.map((article) => toCleanArticle(article));
 
     res.json(cleanedArticles);
 
   } catch (error) {
     console.error(error.response?.data || error.message);
-    res.status(500).json({ message: "Error searching news" });
+    res.json(buildFallbackArticles("all", 10).filter((item) =>
+      item.title.toLowerCase().includes(String(req.query.q || "").toLowerCase())
+    ));
   }
 };
 
@@ -125,20 +192,21 @@ const getTrendingNews = async (req, res) => {
   }
 };
 
-//Personalized content
-const User = require("../models/User");
-
 const getPersonalizedNews = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
     const categories = user.preferences;
 
     if (!categories || categories.length === 0) {
-      return res.status(400).json({ message: "No preferences set" });
+      return res.json([]);
     }
 
     // fetch all categories in parallel
-    const requests = categories.map(category =>
+    const normalizedCategories = categories.map((cat) => String(cat).toLowerCase());
+    const requests = normalizedCategories.map(category =>
       axios.get("https://newsapi.org/v2/top-headlines", {
         params: {
           country: "us",
@@ -152,15 +220,8 @@ const getPersonalizedNews = async (req, res) => {
 
     // merge all articles
     
-    let allArticles = responses.flatMap(res =>
-      res.data.articles.map(article => ({
-        title: article.title,
-        description: article.description,
-        url: article.url,
-        image: article.urlToImage || "https://via.placeholder.com/400x200?text=No+Image",
-        source: article.source.name,
-        publishedAt: article.publishedAt
-  }))
+    let allArticles = responses.flatMap((res, index) =>
+      res.data.articles.map((article) => toCleanArticle(article, normalizedCategories[index]))
 );
 
     // 🔁 remove duplicates (based on URL)
@@ -180,7 +241,13 @@ const getPersonalizedNews = async (req, res) => {
     res.json(uniqueArticles);
 
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("getPersonalizedNews failed:", err.response?.data || err.message);
+    const user = await User.findById(req.user.id);
+    const normalizedCategories = (user?.preferences || []).map((cat) => String(cat).toLowerCase());
+    const fallback = normalizedCategories.length
+      ? buildFallbackArticles("all", 20).filter((item) => normalizedCategories.includes(item.category))
+      : [];
+    res.json(fallback);
   }
 };
 

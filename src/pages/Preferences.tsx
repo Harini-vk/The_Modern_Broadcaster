@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Settings, Check, ChevronDown, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 const CATEGORIES = [
   "Business",
   "Entertainment",
@@ -12,12 +13,15 @@ const CATEGORIES = [
 ];
 import API from "../api/axios";
 import { cn } from '../lib/utils';
+import { useTheme } from '../components/ThemeProvider';
 
 
 const Preferences: React.FC = () => {
   const [interests, setInterests] = useState(['Technology', 'Business']);
-  const [readingMode, setReadingMode] = useState('Light');
+  // const [readingMode, setReadingMode] = useState('Light');
   const [user, setUser] = useState<any>(null);
+  const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
   
 
 const toggleInterest = async (category: string) => {
@@ -56,6 +60,9 @@ useEffect(() => {
     }
   };
 
+
+  
+
   fetchUser();
 }, []);
 
@@ -68,17 +75,18 @@ useEffect(() => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
         <section className="lg:col-span-1">
-          <div className="bg-white p-8 rounded-xl shadow-sm border border-slate-200 sticky top-28">
+          <div className="bg-surface-container-low p-6 rounded-xl border border-slate-700/30">
             <div className="flex flex-col items-center text-center">
               <div className="w-24 h-24 rounded-full overflow-hidden mb-4 ring-4 ring-blue-50">
                 <img 
-                  src="https://i.pravatar.cc/150?u=alex" 
+// want the image to be dynamic based on the user name
+                  src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || "User")}&background=0D8ABC&color=fff&size=128`}
                   className="w-full h-full object-cover" 
                   alt="User Avatar"
                 />
               </div>
               <h2 className="text-2xl font-bold font-serif">{user?.name || "unknown"}</h2>
-              <p className="text-on-surface-variant text-sm mb-6">Premium Subscriber since 2022</p>
+              <p className="text-on-surface-variant text-sm mb-6">   </p>
               
               <div className="w-full space-y-4 text-left">
                 <div>
@@ -91,10 +99,18 @@ useEffect(() => {
                 </div>
               </div>
 
-              <button className="mt-8 w-full py-3 bg-primary text-white rounded-full font-semibold shadow-md hover:shadow-lg transition-shadow active:scale-95">
+              <button className="mt-8 w-full py-3 bg-primary text-black rounded-full font-semibold shadow-md hover:shadow-lg transition-shadow active:scale-95">
                 Edit Profile
               </button>
-              <button className="mt-4 w-full py-3 text-primary font-semibold hover:bg-surface-container-high rounded-full transition-colors flex items-center justify-center gap-2">
+              <button
+                onClick={() => {
+                  localStorage.removeItem("token");
+                  sessionStorage.removeItem("token");
+                  window.dispatchEvent(new Event("auth-changed"));
+                  navigate("/auth");
+                }}
+                className="mt-4 w-full py-3 text-primary font-semibold hover:bg-surface-container-high rounded-full transition-colors flex items-center justify-center gap-2"
+              >
                 <LogOut className="w-4 h-4" />
                 Sign Out
               </button>
@@ -132,7 +148,7 @@ useEffect(() => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white p-6 rounded-xl border border-slate-200">
+            <div className="bg-surface-container-low p-6 rounded-xl border border-slate-700/30">
               <h4 className="font-bold text-lg mb-2">Newsletter Frequency</h4>
               <p className="text-sm text-on-surface-variant mb-4">Choose how often you receive our curated editorial digests.</p>
               <div className="relative">
@@ -145,22 +161,28 @@ useEffect(() => {
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-xl border border-slate-200">
+            <div className="bg-surface-container-low p-6 rounded-xl border border-slate-700/30">
               <h4 className="font-bold text-lg mb-2">Reading Mode</h4>
               <p className="text-sm text-on-surface-variant mb-4">Optimize the reading interface for your device or environment.</p>
               <div className="flex bg-surface-container p-1 rounded-lg">
-                {['Light', 'Dark', 'Auto'].map(mode => (
-                  <button
-                    key={mode}
-                    onClick={() => setReadingMode(mode)}
-                    className={cn(
-                      "flex-1 py-2 rounded-lg font-medium text-sm transition-all",
-                      readingMode === mode ? "bg-white shadow-sm text-primary" : "text-on-surface-variant hover:text-on-surface"
-                    )}
-                  >
-                    {mode}
-                  </button>
-                ))}
+{['light', 'dark'].map(mode => (
+  <button
+    key={mode}
+    onClick={() => {
+      if (theme !== mode) {
+        toggleTheme();
+      }
+    }}
+    className={cn(
+      "flex-1 py-2 rounded-lg font-medium text-sm transition-all capitalize",
+      theme === mode
+        ? "bg-white dark:bg-slate-700 shadow-sm text-sky-950"
+        : "text-on-surface-variant hover:text-sky-950"
+    )}
+  >
+    {mode}
+  </button>
+))}
               </div>
             </div>
           </div>
@@ -193,7 +215,7 @@ useEffect(() => {
             <button className="px-8 py-3 text-on-surface-variant font-semibold hover:bg-surface-container-high rounded-full transition-colors">
               Discard Changes
             </button>
-            <button className="px-8 py-3 bg-primary text-white font-semibold rounded-full shadow-md hover:shadow-lg transition-all active:scale-95">
+            <button className="px-8 py-3 bg-primary text-black font-semibold rounded-full shadow-md hover:shadow-lg transition-all active:scale-95">
               Save Preferences
             </button>
           </div>

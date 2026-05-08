@@ -11,13 +11,15 @@ exports.addBookmark = async (req, res) => {
     // prevent duplicate using URL
     const exists = user.bookmarks.some(b => b.url === url);
     if (exists) {
-      return res.json({ message: "Already bookmarked" });
+      const existingBookmark = user.bookmarks.find((b) => b.url === url);
+      return res.json({ message: "Already bookmarked", _id: existingBookmark?._id });
     }
 
     user.bookmarks.push({ title, url, image, source });
     await user.save();
 
-    res.json({ message: "Bookmark added" });
+    const addedBookmark = user.bookmarks[user.bookmarks.length - 1];
+    res.json({ message: "Bookmark added", _id: addedBookmark?._id });
 
   } catch (err) {
     res.status(500).json({ error: err.message });

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { TowerControl as RadioTower, Quote, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { cn } from '../lib/utils';
+import toast from "react-hot-toast";
 
 import API from "../api/axios";
 
@@ -24,12 +25,13 @@ const handleLogin = async () => {
     });
 
     localStorage.setItem("token", res.data.token);
+    window.dispatchEvent(new Event("auth-changed"));
 
-    alert("Login successful");
-    navigate("/"); // go to home
+    toast.success("Login successful");
+    navigate("/explore?category=all");
 
   } catch (err) {
-    alert("Login failed");
+    toast.error("Invalid email or password");
   }
 };
 
@@ -41,10 +43,10 @@ const handleSignup = async () => {
       password
     });
 
-    alert("Signup successful! Please login");
+    toast.success("Signup successful! Please login");
 
   } catch (err) {
-    alert("Signup failed");
+    toast.error("Signup Failed");
   }
 };
 
@@ -198,7 +200,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
               <button 
                 type="submit"
-                className="w-full bg-primary text-white py-4 rounded-full font-bold shadow-lg shadow-primary/10 hover:shadow-primary/20 transition-all active:scale-[0.98]"
+                className="w-full bg-blue-300 text-black py-4 rounded-full font-bold shadow-lg shadow-primary/10 hover:shadow-primary/20 transition-all active:scale-[0.98]"
               >
                 {isLogin ? "Continue to Broadcaster" : "Create Account"}
               </button>

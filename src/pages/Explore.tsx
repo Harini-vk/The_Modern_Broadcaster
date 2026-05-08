@@ -59,7 +59,7 @@ const [activeCategory, setActiveCategory] = useState(
   };
 
 useEffect(() => {
-  const selectedCategory = categoryFromURL || "general";
+  const selectedCategory = categoryFromURL || "all";
 
   setActiveCategory(formatCategory(selectedCategory));
   fetchNews(selectedCategory);
@@ -82,15 +82,15 @@ useEffect(() => {
               key={category}
               onClick={() => {
   const categoryParam =
-    category === "All" ? "general" : category.toLowerCase();
+    category === "All" ? "all" : category.toLowerCase();
 
   navigate(`/explore?category=${categoryParam}`);
 }}
               className={cn(
                 "px-6 py-2 rounded-full",
                 activeCategory === category
-                  ? "bg-primary text-white"
-                  : "bg-gray-200"
+                  ? "bg-blue-300 text-black"
+                  : "bg-gray-200 text-black"
               )}
             >
               {category}
