@@ -1,153 +1,101 @@
-# The Modern Broadcaster — Project Description
+# PulseNews – The Modern Broadcaster
 
-## 📌 Overview
-
-**The Modern Broadcaster** is a modern full-stack news web application that delivers real-time and categorized news content through an interactive and user-friendly interface.
-
-The platform is designed to provide users with:
-
-* categorized news browsing,
-* personalized news recommendations,
-* authentication-based user experience,
-* responsive modern UI,
-* and dynamic news rendering.
-
-The application focuses on creating a cleaner and smarter digital news experience compared to traditional news portals.
+##  Live:  
+https://pulsenews-ruby.vercel.app/
 
 ---
 
-# 🎯 Main Objective
+##  Overview
 
-The objective of this project is to build a modern digital news platform where users can:
+PulseNews (The Modern Broadcaster) is a full-stack MERN-based news aggregation platform that delivers real-time categorized news with personalized recommendations, secure authentication, and a responsive user experience.
 
-* explore trending and categorized news,
-* create accounts,
-* receive personalized content based on interests,
-* and interact with a fast and responsive news interface.
+The platform allows users to discover trending news, search articles, save bookmarks, and receive personalized content based on their selected interests.
 
 ---
 
-# ⚙️ Working of the Project
+##  System Architecture
 
-## 1️. User Visits the Website
-
-Users can open the platform and browse available news articles.
-
----
-
-## 2️. News Categories
-
-News is divided into multiple categories such as:
-
-* Technology
-* Sports
-* Business
-* Entertainment
-* Health
-* Science
-* General News
-
-Users can navigate between categories using the navigation menu.
+Frontend (React + Vite)
+↓
+Axios API Calls
+↓
+Express.js Backend
+↓
+MongoDB Atlas
+↓
+JWT Authentication
 
 ---
 
-## 3️. Authentication System
+## 🛠️ Tech Stack
 
-Users can:
-
-* Sign Up
-* Login
-* Logout
-
-Authentication is handled securely using JWT-based login sessions.
-
----
-
-## 4️. Personalized News System
-
-The platform includes a personalized news feature.
-
-### If User is NOT Logged In:
-
-* all news articles are visible,
-* but the personalized section appears faded/locked,
-* and a signup prompt encourages the user to create an account.
-
-### If User is Logged In:
-
-* user interests are fetched from the database,
-* matching category news is filtered,
-* and a personalized news feed is displayed.
-
----
-
-## 5️. Dynamic News Rendering
-
-News articles are dynamically fetched and displayed using reusable React components.
-
-Each news card displays:
-
-* title,
-* image,
-* description,
-* source,
-* and publishing details.
-
----
-
-## 6️. Responsive UI
-
-The application is designed with a modern responsive layout that works across:
-
-* desktop,
-* tablet,
-* and mobile devices.
-
----
-
-# 🛠️ Technologies Used
-
-## Frontend
+### Frontend
 
 * React.js
+* TypeScript
+* Vite
 * React Router
-* JavaScript / TypeScript
-* CSS
-* Tailwind CSS (if used)
 * Axios
+* Tailwind CSS
 
----
-
-## Backend
+### Backend
 
 * Node.js
 * Express.js
 
----
+### Database
 
-## Database
-
-* MongoDB
+* MongoDB Atlas
 * Mongoose
 
----
-
-## Authentication
+### Authentication
 
 * JWT (JSON Web Token)
-* bcrypt.js
+* bcrypt
+
+### DevOps
+
+* GitHub Actions
+* Vercel
+* Render
 
 ---
 
-## Development Tools
+## 📂 Project Structure
 
-* VS Code
-* Git & GitHub
-* Nodemon
-* Postman
+The_Modern_Broadcaster/
+├── src/
+├── backend/
+├── .github/workflows/
+├── public/
+└── package.json
 
 ---
 
-# 📌 Conclusion
+## 🚀 Deployment
 
-The Modern Broadcaster is a modern MERN-stack news platform that combines authentication, personalization, and dynamic news delivery into a responsive and scalable application. The project demonstrates full-stack web development concepts including frontend-backend integration, database management, secure authentication, and user-specific content rendering.
+### Frontend
+
+* Vercel
+
+### Backend
+
+* Render
+
+### Database
+
+* MongoDB Atlas
+
+### Continuous Integration
+GitHub Actions
+
+---
+
+## 📌 Future Enhancements
+
+* AI-powered news summarization
+* Sentiment analysis
+* User commenting system
+* News recommendation engine
+
+Built as a full-stack MERN project demonstrating frontend development, backend APIs, authentication, database integration, deployment, and CI/CD practices.
