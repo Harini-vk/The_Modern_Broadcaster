@@ -2,6 +2,9 @@ const axios = require("axios");
 const ArticleEngagement = require("../models/ArticleEngagement");
 const User = require("../models/User");
 
+const { extract } = require("@extractus/article-extractor");
+const { convert } = require("html-to-text");
+
 const FALLBACK_IMAGE = "https://via.placeholder.com/400x200?text=No+Image";
 const ALL_CATEGORIES = ["general", "business", "entertainment", "health", "science", "sports", "technology"];
 
@@ -251,11 +254,72 @@ const getPersonalizedNews = async (req, res) => {
   }
 };
 
+const getFullArticle = async (req, res) => {
+  try {
+    const { url } = req.query;
+
+    if (!url) {
+      return res.status(400).json({
+        success: false,
+        message: "Article URL is required"
+      });
+    }
+
+    const article = await extract(url);
+
+convert(article.content || "", {
+  wordwrap: 130,
+  selectors: [
+    { selector: "a", options: { ignoreHref: true } },
+    { selector: "table", format: "dataTable" }
+  ]
+});
+
+// remove markdown-style links
+cleanContent = cleanContent.replace(/\[https?:\/\/[^\]]+\]/g, "");
+
+// remove extra empty lines
+cleanContent = cleanContent.replace(/\n\s*\n/g, "\n\n");
+
+    // extractor failed or empty content
+    if (!article || !article.content) {
+      return res.json({
+        success: false,
+        extracted: false
+      });
+    }
+
+    res.json({
+      success: true,
+      extracted: true,
+      article: {
+        title: article.title || "News Article",
+        content: cleanContent,
+        image: article.image || FALLBACK_IMAGE,
+        author: article.author || "Unknown",
+        published: article.published || null,
+        url
+      }
+    });
+
+  } catch (error) {
+    console.log("Extractor Error:", error.message);
+
+    // IMPORTANT:
+    // DO NOT THROW ERROR TO FRONTEND
+    // just return extracted false
+    res.json({
+      success: false,
+      extracted: false
+    });
+  }
+};
 
 module.exports = {
   getNews,
   searchNews,
   getPersonalizedNews,
   recordEngagement,
-  getTrendingNews
+  getTrendingNews,
+  getFullArticle
 };

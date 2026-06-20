@@ -6,7 +6,8 @@ const {
   searchNews,
   recordEngagement,
   getTrendingNews,
-  getPersonalizedNews
+  getPersonalizedNews,
+  getFullArticle
 } = require("../controllers/newsController");
 const authMiddleware = require("../middleware/authMiddleware");
 
@@ -14,6 +15,7 @@ router.get("/search", searchNews);
 router.get("/trending", getTrendingNews);
 router.get("/personalized", authMiddleware, getPersonalizedNews);
 router.post("/engagement", recordEngagement);
+router.get("/full-article", getFullArticle);
 router.get("/:category", getNews);   
 router.get("/", getNews);
 

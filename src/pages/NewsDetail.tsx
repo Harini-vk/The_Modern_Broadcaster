@@ -18,6 +18,9 @@ const NewsDetail: React.FC = () => {
 
   const [bookmarks, setBookmarks] = useState<Article[]>([]);
 
+  const [fullArticle, setFullArticle] = useState<any>(null);
+  const [loadingArticle, setLoadingArticle] = useState(false);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [id, location.search]);
@@ -64,6 +67,33 @@ const NewsDetail: React.FC = () => {
 
     recordView();
   }, [article]);
+
+  useEffect(() => {
+  const fetchFullArticle = async () => {
+    if (!article?.url) return;
+
+    try {
+      setLoadingArticle(true);
+
+      const res = await API.get("/news/full-article", {
+        params: {
+          url: article.url
+        }
+      });
+
+      if (res.data?.extracted) {
+        setFullArticle(res.data.article);
+      }
+
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoadingArticle(false);
+    }
+  };
+
+  fetchFullArticle();
+}, [article]);
 
   const relatedArticles = useMemo(() => {
     if (!article?.url) return [];
@@ -169,19 +199,47 @@ const NewsDetail: React.FC = () => {
         </div>
       </figure>
 
-      <div className="news-content max-w-2xl mx-auto">
-        <ReactMarkdown>{article.description || 'No description available.'}</ReactMarkdown>
-        {article.url && (
-          <a
-            href={article.url}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-block mt-6 text-primary hover:underline font-semibold"
-          >
-            Read original article
-          </a>
-        )}
-      </div>
+<div className="news-content max-w-2xl mx-auto">
+
+  {loadingArticle ? (
+    <p className="text-on-surface-variant">
+      Loading article...
+    </p>
+  ) : fullArticle?.content ? (
+    <>
+      <ReactMarkdown>
+        {fullArticle.content}
+      </ReactMarkdown>
+
+      <a
+        href={article.url}
+        target="_blank"
+        rel="noreferrer"
+        className="inline-block mt-6 text-primary hover:underline font-semibold"
+      >
+        Read original article
+      </a>
+    </>
+  ) : (
+    <>
+      <ReactMarkdown>
+        {article.description || 'No description available.'}
+      </ReactMarkdown>
+
+      {article.url && (
+        <a
+          href={article.url}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-block mt-6 text-primary hover:underline font-semibold"
+        >
+          Read original article
+        </a>
+      )}
+    </>
+  )}
+
+</div>
 
       <div className="max-w-2xl mx-auto mt-16 pt-8 border-t border-outline-variant flex items-center justify-end gap-4">
         <span className="text-xs font-medium text-on-surface-variant">Share this story:</span>
